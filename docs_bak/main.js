@@ -11,7 +11,8 @@ firebase.initializeApp(config);
 
 // Initialize Cloud Firestore through Firebase
 var db = firebase.firestore();
-
+const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+console.log(timestamp);
 db.collection("rooms").doc("1").collection("chats")
   .onSnapshot(function (querySnapshot) {
     clearChatArea();
@@ -36,7 +37,10 @@ document.querySelector('#submit-button').addEventListener('click', function (e) 
   console.log(value);
   db.collection("rooms").doc("1").collection("chats").add({
     name: "unchi",
-    value: value
+    value: value,
+    uid: uid,
+    timestamp: Date.now(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   })
     .then(function () {
       console.log("Document successfully written!");
@@ -44,6 +48,29 @@ document.querySelector('#submit-button').addEventListener('click', function (e) 
     .catch(function (error) {
       console.error("Error writing document: ", error);
     });
+});
+
+firebase.auth().signInAnonymously().catch(function (error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  console.log(error);
+});
+
+var uid;
+firebase.auth().onAuthStateChanged(function (user) {
+  if (user) {
+    // User is signed in.
+    var isAnonymous = user.isAnonymous;
+    uid = user.uid;
+    console.log(uid);
+    console.log(user)
+    // ...
+  } else {
+    // User is signed out.
+    // ...
+  }
+  // ...
 });
 
 // Add a new document in collection "cities"
