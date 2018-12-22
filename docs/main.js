@@ -27,7 +27,7 @@ function clearChatArea() {
 
 function addChatArea(data) {
   var p = document.createElement('p');
-  p.textContent = data.value;
+  p.innerHTML = data.value;
   document.querySelector('#chat-area').append(p);
 }
 
