@@ -2,9 +2,12 @@ import React from 'react';
 import './App.css';
 import ChatBox from './ChatBox';
 
-import firebase from 'firebase/app'; //必須
-import 'firebase/firestore'; //必要なモジュールごとにimport
-//例: Cloud Functionを使う場合は import 'firebase/function';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+
+import imgFieldBack from './assets/puyo_field_back.png';
+
+import Game from './lib/Game';
 
 //インスタンスの初期化
 firebase.initializeApp({
@@ -48,13 +51,28 @@ export default class App extends React.Component {
     });
   }
 
+  componentDidUpdate() {
+    const ctx1 = this.refs.canvas1.getContext('2d');
+    const ctx2 = this.refs.canvas2.getContext('2d');
+
+    const image = new Image();
+    image.onload = () => {
+      ctx1.drawImage(image, 0, 0);
+      ctx2.drawImage(image, 0, 0);
+    }
+    image.src = imgFieldBack;
+  }
+
   render() {
     console.log('render');
+
     var list = this.state.chatObjs.map((v, i) => <p key={i}>{v.name}: {v.text} :{v.updatedAt}</p>);
 
     return (
       <div className="App">
         <h1>ぷよたんテスト</h1>
+        <canvas ref="canvas1" width="192px" height="416px" className="canvasField"></canvas>
+        <canvas ref="canvas2" width="192px" height="416px" className="canvasField"></canvas>
         {list}
         <ChatBox onButtonClick={this.onButtonClick} />
       </div>
@@ -62,6 +80,8 @@ export default class App extends React.Component {
   }
 
   onButtonClick = (chatObj) => {
+    const cvs = this.refs.canvas;
+    console.log(cvs)
     console.log(chatObj);
     this.setState({
       chatObjs: this.state.chatObjs.concat(chatObj)
