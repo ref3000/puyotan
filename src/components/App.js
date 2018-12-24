@@ -5,9 +5,9 @@ import ChatBox from './ChatBox';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
-import imgFieldBack from './assets/puyo_field_back.png';
+import imgFieldBack from '../assets/puyo_field_back.png';
 
-import Game from './lib/Game';
+import Game from '../lib/Game';
 
 //インスタンスの初期化
 firebase.initializeApp({
