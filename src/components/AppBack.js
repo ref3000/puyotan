@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.css';
+import './AppBack.css';
 import ChatBox from './ChatBox';
 
 import firebase from 'firebase/app';
@@ -27,7 +27,7 @@ const a = [{ n: 1 }, { n: 3 }, { n: 5 }, { n: 2 }];
 a.sort((a, b) => a.n - b.n);
 console.log(a);
 
-export default class App extends React.Component {
+export default class AppBack extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
