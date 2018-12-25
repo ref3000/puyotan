@@ -5,6 +5,8 @@ export default (state = [], action) => {
         name: v.name,
         text: v.text
       }))
+    case 'POST_CHAT':
+      return
     default:
       return state
   }
