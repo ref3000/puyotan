@@ -1,7 +1,27 @@
+
+
 .Game {
+  position: relative;
   margin: 32px auto;
-  padding: 0;
-  height: 540px;
   width: 960px;
+  height: 540px;
   background-color: darkgray;
+}
+
+.Game-field {
+  width: 192px;
+  height: 416px;
+  background-image: url(../assets/puyo_field_back.png);
+}
+
+.Game-pos-field1 {
+  position: absolute;
+  left: 132px;
+  top: 64px;
+}
+
+.Game-pos-field2 {
+  position: absolute;
+  right: 132px;
+  top: 64px;
 }

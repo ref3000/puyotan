@@ -4,15 +4,17 @@ import './Game.css';
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
-    // this.state = {
-    //   name: "",
-    //   text: ""
-    // };
+    this.state = {
+      name: "",
+      text: ""
+    };
   }
 
   render() {
     return (
       <div className="Game">
+        <div className="Game-field Game-pos-field1"></div>
+        <div className="Game-field Game-pos-field2"></div>
       </div>
     );
   }
