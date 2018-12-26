@@ -258,6 +258,17 @@ class Field {
     }
     return true
   }
+  map(transform) {
+    let array = [];
+    for (let y = 1; y <= this.height; y++) {
+      for (let x = 1; x <= this.width; x++) {
+        let pos = new Pos(x, y)
+        let kind = this.get(pos)
+        array.push(transform(pos, kind));
+      }
+    }
+    return array;
+  }
 }
 
 export default {

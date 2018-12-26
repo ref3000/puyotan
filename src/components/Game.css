@@ -5,7 +5,7 @@
   margin: 32px auto;
   width: 960px;
   height: 540px;
-  background-color: darkgray;
+  background-color: #efefef;
 }
 
 .Game-field {
@@ -24,4 +24,36 @@
   position: absolute;
   right: 132px;
   top: 64px;
+}
+
+.Game-puyo {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  left: 32px;
+  top: 32px;
+}
+
+.Game-puyo-kind-red {
+  background-image: url(../assets/puyo_r.png);
+}
+
+.Game-puyo-kind-green {
+  background-image: url(../assets/puyo_g.png);
+}
+
+.Game-puyo-kind-blue {
+  background-image: url(../assets/puyo_b.png);
+}
+
+.Game-puyo-kind-yellow {
+  background-image: url(../assets/puyo_y.png);
+}
+
+.Game-puyo-kind-ojama {
+  background-image: url(../assets/puyo_o.png);
+}
+
+.Game-puyo-kind-blank {
+  background-image: none;
 }
