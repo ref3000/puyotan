@@ -1,0 +1,24 @@
+.AppHeader {
+  margin: 0;
+  padding: 0;
+  height: 42px;
+  background-color: #282c34;
+  color: white;
+  display: flex;
+  justify-content: center;
+}
+
+.AppHeader-title {
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+  height: 42px;
+  font-size: 32px;
+}
+
+.AppHeader-version {
+  display: flex;
+  align-items: flex-end;
+  height: 42px;
+  font-size: 16px;
+}

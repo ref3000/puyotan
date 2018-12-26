@@ -1,12 +1,11 @@
 import React from 'react'
-// import ChatList from './containers/ChatList'
-// import ChatBox from './containers/ChatBox'
-// import AppBack from './AppBack'
+import './App.css';
+import AppHeader from './AppHeader'
+import Game from './Game'
 
-const App = () => (
-  <div>
-    <h1>ぷよたんβ v0.1</h1>
+export default () => (
+  <div className='App'>
+    <AppHeader />
+    <Game />
   </div>
 )
-
-export default App
