@@ -55,16 +55,7 @@ class Next {
     return this._size
   }
   get(num) {
-    return this._puyos[num % 1024]
-  }
-  _nextKind() {
-    switch (this._random.nextInt(4)) {
-      case 0: return Kind.RED
-      case 1: return Kind.GREEN
-      case 2: return Kind.BLUE
-      case 3: return Kind.YELLOW
-      default: throw new Error("unexpected error")
-    }
+    return this._puyos[num % this._size]
   }
   seed() {
     return this._seed
@@ -75,6 +66,15 @@ class Next {
       this._puyos[turn].axis = kind
     } else {
       this._puyos[turn].sub = kind
+    }
+  }
+  _nextKind() {
+    switch (this._random.nextInt(4)) {
+      case 0: return Kind.RED
+      case 1: return Kind.GREEN
+      case 2: return Kind.BLUE
+      case 3: return Kind.YELLOW
+      default: throw new Error("unexpected error")
     }
   }
 }

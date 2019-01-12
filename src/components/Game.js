@@ -11,6 +11,11 @@ export default class Game extends React.Component {
       field1: new Puyo.Field(),
       field2: new Puyo.Field()
     };
+    this.puyotan = new Puyotan.Puyotan();
+
+    // console 操作用
+    window.Puyotan = Puyotan;
+    window.Game = this;
     // this.cnt = 0;
     // setInterval(() => {
     //   const field = this.state.field1.copy();
@@ -60,6 +65,14 @@ export default class Game extends React.Component {
       case Puyo.Kind.OJAMA: return "Game-puyo-kind-ojama"
       default: return "Game-puyo-kind-blank"
     }
+  }
+
+  setAction(id, action) {
+    this.puyotan.setAction(id, action);
+  }
+
+  stepNextFrame(id, action) {
+    this.puyotan.stepNextFrame();
   }
 
   // submit = (e) => {
