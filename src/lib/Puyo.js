@@ -14,17 +14,12 @@ const Kind = {
   PEKE: 9
 }
 
-// 補助関数
-function isNull(obj) {
-  return obj == null
-}
-
 //------------------------------------------ クラス定義
 /** ぷよの組 */
 class PuyoPair {
-  constructor(axis, sub) {
-    this.axis = isNull(axis) ? Kind.BRANK : axis
-    this.sub = isNull(sub) ? Kind.BRANK : sub
+  constructor(axis = Kind.BRANK, sub = Kind.BRANK) {
+    this.axis = axis
+    this.sub = sub
   }
 }
 
@@ -124,11 +119,18 @@ class Field {
     }
     this._field[pos.y - 1][pos.x - 1] = kind
   }
+  setAndFall(x, kind) {
+    if (x < 1 || x > this.width) throw RangeError('out of field.');
+    if (this.isBrank(new Pos(x, 13))) {
+      this.set(new Pos(x, 13), kind);
+      this.fall();
+    }
+  }
   fall() {
     let flag = false // 落下が発生したかどうか
     for (let x = 1; x <= this.width; x++) {
       let t = 1
-      for (let y = 1; y <= this.height; y++) {
+      for (let y = 1; y <= (this.height + 1); y++) {
         let p = this.get(new Pos(x, y))
         if (p === Kind.BRANK) continue
         if (p === Kind.WALL) {
@@ -269,11 +271,17 @@ class Field {
     }
     return array;
   }
+  toString() {
+    let field = this.copy()._field;
+    field.reverse();
+    return field.map(line => line.join(',')).join('\n');
+  }
 }
 
 export default {
   Kind: Kind,
   Pos: Pos,
   Next: Next,
-  Field: Field
+  Field: Field,
+  PuyoPair: PuyoPair,
 }
