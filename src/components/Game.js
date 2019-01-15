@@ -3,6 +3,22 @@ import './Game.css';
 import Puyo from '../lib/Puyo.js';
 import Puyotan from '../lib/Puyotan.js';
 
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+
+//インスタンスの初期化
+firebase.initializeApp({
+  apiKey: "AIzaSyDNckvdwFU9B-Xg3YPY-tgsrj09kg0MTxE",
+  authDomain: "puyotan-be458.firebaseapp.com",
+  databaseURL: "https://puyotan-be458.firebaseio.com",
+  projectId: "puyotan-be458",
+  storageBucket: "puyotan-be458.appspot.com",
+  messagingSenderId: "1067679324903"
+});
+const db = firebase.firestore();
+const settings = { timestampsInSnapshots: true };
+db.settings(settings);
+
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -83,23 +99,28 @@ export default class Game extends React.Component {
       }
     })
 
-    // console 操作用
-    window.Puyotan = Puyotan;
-    window.Game = this;
-    window.put = (id, x, dir) => {
-      this.setAction(id, new Puyotan.Action(Puyotan.ActionType.PUT, x, dir));
-    }
-    window.pass = (id) => {
-      this.setAction(id, new Puyotan.Action(Puyotan.ActionType.PASS));
-    }
-    window.step = () => {
-      this.stepNextFrame();
-    }
+    // firestore 監視用
+    // let ref = db.collection("puyotan").doc('player1');
+    // ref.orderBy('')
+    db.collection("puyotan/histories/0").onSnapshot((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        if (this.state.frame === doc.id) {
+          this.setAction(0, doc.data());
+        }
+      });
+    });
+    db.collection("puyotan/histories/1").onSnapshot((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        if (this.state.frame === doc.id) {
+          this.setAction(1, doc.data());
+        }
+      });
+    });
   }
 
   render() {
     return (
-      <div className="Game">
+      <div className="Game" >
         <div className={`Game-history Game-pos-history1`}>
           {this.actionHistoriesToElements(this.state.actionHistories1)}
         </div>
@@ -108,13 +129,13 @@ export default class Game extends React.Component {
         </div>
         <div className={"Game-field Game-pos-field1" + (this.state.isControlledPlayer1 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field1)}
-          <div style={({ top: 32 * (13 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (13 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
         </div>
         <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field2)}
-          <div style={({ top: 32 * (13 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (13 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
         </div>
         <div className="Game-next Game-pos-next11">
           {this.nextToElements(this.state.next11)}
@@ -265,6 +286,15 @@ export default class Game extends React.Component {
 
   setAction(id, action) {
     this.puyotan.setAction(id, action);
+    db.collection(`puyotan/histories/${id}`).doc(String(this.state.frame)).set({
+      type: action.type,
+      x: action.x,
+      dir: action.dir,
+    }).then(function () {
+      console.log("Document successfully written!");
+    }).catch(function (error) {
+      throw Error(error);
+    });
   }
 
   moveLeft() {
@@ -309,14 +339,14 @@ export default class Game extends React.Component {
 
   putPuyo() {
     if (this.state.isControlledPlayer1) {
-      this.puyotan.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1))
+      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1))
       this.setState({
         controledPos1: 3,
         controledDir1: 0,
       })
     }
     if (this.state.isControlledPlayer2) {
-      this.puyotan.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2))
+      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2))
       this.setState({
         controledPos2: 3,
         controledDir2: 0,
@@ -327,14 +357,14 @@ export default class Game extends React.Component {
 
   pass() {
     if (this.state.isControlledPlayer1) {
-      this.puyotan.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS));
+      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS));
       this.setState({
         controledPos1: 3,
         controledDir1: 0,
       })
     }
     if (this.state.isControlledPlayer2) {
-      this.puyotan.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS));
+      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS));
       this.setState({
         controledPos2: 3,
         controledDir2: 0,
@@ -377,7 +407,7 @@ export default class Game extends React.Component {
     this.reflectPuyotanView(vm);
     if (vm.players[0].actionHistories[vm.frame] != null && vm.players[1].actionHistories[vm.frame] != null) {
       this.isControllable = false;
-      setTimeout(() => {this.stepNextFrame()}, 500);
+      setTimeout(() => { this.stepNextFrame() }, 500);
     } else {
       this.isControllable = true;
     }
