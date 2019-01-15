@@ -150,6 +150,7 @@ export default class Game extends React.Component {
       });
       this.applyActions(1, actions);
     });
+
     // db.collection("puyotan/histories/0").onSnapshot((querySnapshot) => {
     //   let histories = [];
     //   querySnapshot.forEach((doc) => {
