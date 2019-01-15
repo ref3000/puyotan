@@ -23,8 +23,30 @@ export default class Game extends React.Component {
   constructor(props) {
     super(props);
     this.puyotan = new Puyotan.Puyotan();
-    let vm = this.puyotan.getViewModel();
     this.state = {
+      activePair1: new Puyo.PuyoPair(),
+      activePair2: new Puyo.PuyoPair(),
+      field1: new Puyo.Field(),
+      field2: new Puyo.Field(),
+      next11: new Puyo.PuyoPair(),
+      next12: new Puyo.PuyoPair(),
+      next21: new Puyo.PuyoPair(),
+      next22: new Puyo.PuyoPair(),
+      frame: 0,
+      actionHistories1: [],
+      actionHistories2: [],
+      chain1: 0,
+      chain2: 0,
+      score1: 0,
+      score2: 0,
+      usedScore1: 0,
+      usedScore2: 0,
+      nonActiveOjama1: 0,
+      nonActiveOjama2: 0,
+      activeOjama1: 0,
+      activeOjama2: 0,
+      gameStatusText: '初期化待ち',
+
       controledPos1: 0,
       controledDir1: 0,
       controledPos2: 0,
@@ -32,7 +54,7 @@ export default class Game extends React.Component {
       isControlledPlayer1: true,
       isControlledPlayer2: true,
     };
-    Object.assign(this.state, this.puyotanViewModelToStateObject(vm));
+    // Object.assign(this.state, this.puyotanViewModelToStateObject(vm));
     this.isControllable = true;
 
     // keyboard 操作用
@@ -90,7 +112,7 @@ export default class Game extends React.Component {
         case 82: // r
           return
         case 83: // s
-          this.gameStart();
+          this.sendInit();
           return
         case 84: // t
           return
@@ -100,22 +122,49 @@ export default class Game extends React.Component {
     })
 
     // firestore 監視用
-    // let ref = db.collection("puyotan").doc('player1');
-    // ref.orderBy('')
-    db.collection("puyotan/histories/0").onSnapshot((querySnapshot) => {
+    db.collection("puyotan").doc("info").onSnapshot((docSnapshot) => {
+      let info = docSnapshot.data();
+      this.initPuyotan(info.seed);
+    });
+    db.collection("puyotan/actions/0").onSnapshot((querySnapshot) => {
+      let actions = [];
       querySnapshot.forEach((doc) => {
-        if (String(this.state.frame) === doc.id) {
-          this.setAction(0, doc.data(), this.state.frame, false);
+        let d = doc.data();
+        actions[doc.id] = {
+          type: d.type,
+          x: d.x,
+          dir: d.dir,
         }
       });
+      this.applyActions(0, actions);
     });
-    db.collection("puyotan/histories/1").onSnapshot((querySnapshot) => {
+    db.collection("puyotan/actions/1").onSnapshot((querySnapshot) => {
+      let actions = [];
       querySnapshot.forEach((doc) => {
-        if (String(this.state.frame) === doc.id) {
-          this.setAction(1, doc.data(), this.state.frame, false);
+        let d = doc.data();
+        actions[doc.id] = {
+          type: d.type,
+          x: d.x,
+          dir: d.dir,
         }
       });
+      this.applyActions(1, actions);
     });
+    // db.collection("puyotan/histories/0").onSnapshot((querySnapshot) => {
+    //   let histories = [];
+    //   querySnapshot.forEach((doc) => {
+    //     histories.push(doc.data());
+    //   });
+    //   console.log('update!');
+    //   console.log(histories);
+    // });
+    // db.collection("puyotan/histories/1").onSnapshot((querySnapshot) => {
+    //   querySnapshot.forEach((doc) => {
+    //     if (String(this.state.frame) === doc.id) {
+    //       this.setAction(1, doc.data(), this.state.frame, false);
+    //     }
+    //   });
+    // });
   }
 
   render() {
@@ -272,47 +321,6 @@ export default class Game extends React.Component {
     this.setState(this.puyotanViewModelToStateObject(vm));
   }
 
-  gameStart() {
-    this.puyotan.start();
-    let vm = this.puyotan.getViewModel();
-    this.reflectPuyotanView(vm);
-    this.setState({
-      controledPos1: 3,
-      controledDir1: 0,
-      controledPos2: 3,
-      controledDir2: 0,
-    })
-  }
-
-  setAction(id, action, frame, isMyself) {
-    console.log('setAction', id, action, frame, isMyself)
-    if (this.puyotan.getViewModel().frame === frame && this.puyotan.setAction(id, action)) {
-      if (id === 0) {
-        this.setState({
-          controledPos1: 3,
-          controledDir1: 0,
-        });
-      } else {
-        this.setState({
-          controledPos2: 3,
-          controledDir2: 0,
-        });
-      }
-      if (isMyself) {
-        db.collection(`puyotan/histories/${id}`).doc(String(this.state.frame)).set({
-          type: action.type,
-          x: action.x,
-          dir: action.dir,
-        }).then(function () {
-          console.log("Document successfully written!");
-        }).catch(function (error) {
-          throw Error(error);
-        });
-      }
-      this.stepNextFrame();
-    }
-  }
-
   moveLeft() {
     if (this.state.isControlledPlayer1) if (this.state.controledPos1 > 2 || (this.state.controledPos1 === 2 && this.state.controledDir1 !== 3)) this.setState({ controledPos1: this.state.controledPos1 - 1 });
     if (this.state.isControlledPlayer2) if (this.state.controledPos2 > 2 || (this.state.controledPos2 === 2 && this.state.controledDir2 !== 3)) this.setState({ controledPos2: this.state.controledPos2 - 1 });
@@ -355,19 +363,19 @@ export default class Game extends React.Component {
 
   putPuyo() {
     if (this.state.isControlledPlayer1) {
-      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1), this.state.frame, true)
+      this.sendAction(0, this.state.frame, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1))
     }
     if (this.state.isControlledPlayer2) {
-      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2), this.state.frame, true)
+      this.sendAction(1, this.state.frame, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2))
     }
   }
 
   pass() {
     if (this.state.isControlledPlayer1) {
-      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS), this.state.frame, true);
+      this.sendAction(0, this.state.frame, new Puyotan.Action(Puyotan.ActionType.PASS));
     }
     if (this.state.isControlledPlayer2) {
-      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS), this.state.frame, true);
+      this.sendAction(1, this.state.frame, new Puyotan.Action(Puyotan.ActionType.PASS));
     }
   }
 
@@ -436,5 +444,65 @@ export default class Game extends React.Component {
       activeOjama2: vm.players[1].activeOjama,
       gameStatusText: vm.gameStatusText,
     }
+  }
+
+  sendAction(id, frame, action) {
+    db.collection(`puyotan/actions/${id}`).doc(String(frame)).set({
+      type: action.type,
+      x: action.x,
+      dir: action.dir,
+    }).then(function () {
+      console.log("Document successfully written!");
+    }).catch(function (error) {
+      throw Error(error);
+    });
+  }
+
+  setAction(id, frame, action) {
+    console.log(id, frame, action);
+    if (this.puyotan.frame === frame && this.puyotan.setAction(id, action)) {
+      // if (id === 0) {
+      //   this.setState({
+      //     controledPos1: 3,
+      //     controledDir1: 0,
+      //   });
+      // } else {
+      //   this.setState({
+      //     controledPos2: 3,
+      //     controledDir2: 0,
+      //   });
+      // }
+      this.stepNextFrame();
+    }
+  }
+
+  applyActions(id, actions) {
+    console.log('applyActions', id, actions)
+    let action = actions[this.state.frame];
+    if (action != null) this.setAction(id, this.state.frame, action);
+  }
+
+  sendInit() {
+    db.collection(`puyotan`).doc('info').set({
+      seed: Math.floor(Math.random() * Math.floor(9999))
+    }).then(function () {
+      console.log("Document successfully written!");
+    }).catch(function (error) {
+      throw Error(error);
+    });
+  }
+
+  initPuyotan(seed) {
+    console.log('initPuyotan', seed);
+    this.puyotan = new Puyotan.Puyotan(seed);
+    this.puyotan.start();
+    let vm = this.puyotan.getViewModel();
+    this.reflectPuyotanView(vm);
+    this.setState({
+      controledPos1: 3,
+      controledDir1: 0,
+      controledPos2: 3,
+      controledDir2: 0,
+    })
   }
 }

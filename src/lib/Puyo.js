@@ -28,18 +28,12 @@ class PuyoPair {
  * mode は現在 random のみ対応…
  */
 class Next {
-  constructor(seed, mode) {
-    this.init(seed, mode)
+  constructor(random) {
+    this.init(random)
   }
-  init(seed, mode) {
-    if (mode == null) mode = 'random'
-    this._mode = mode
-    if (seed == null) {
-      let r = new Random()
-      seed = r.nextInt(64 * 64 * 64 * 64)
-    }
-    this._seed = seed
-    this._random = new Random(this._seed)
+  init(random) {
+    if (random == null) random = new Random();
+    this._random = random;
     this._size = 1000
     this._puyos = []
     for (let i = 0; i < this._size; i++) {
@@ -51,9 +45,6 @@ class Next {
   }
   get(num) {
     return this._puyos[num % this._size]
-  }
-  seed() {
-    return this._seed
   }
   edit(turn, kind, isAxis) {
     if (turn >= this._size || turn < 0) return

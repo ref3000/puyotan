@@ -26,7 +26,7 @@ class ActionHistory {
 }
 
 class Player {
-  constructor() {
+  constructor(random) {
     this.field = new Puyo.Field();
     this.actionHistories = [];
     this.activeNextPos = 0;
@@ -36,7 +36,7 @@ class Player {
     this.activeOjama = 0;
     this.chain = 0;
     // 乱数生成器
-    this.random = new Random();
+    this.random = random;
   }
 
   fallOjama(num) {
@@ -65,8 +65,9 @@ class Player {
 }
 
 class Puyotan {
-  constructor() {
-    this.next = new Puyo.Next();
+  constructor(seed) {
+    this.random = new Random(seed);
+    this.next = new Puyo.Next(this.random);
     this.players = [
       new Player(),
       new Player()
