@@ -185,3 +185,7 @@
 .Game-puyo-kind-blank {
   background-image: none;
 }
+
+.hidden {
+  visibility: hidden;
+}

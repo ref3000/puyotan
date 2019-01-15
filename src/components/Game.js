@@ -9,39 +9,20 @@ export default class Game extends React.Component {
     this.puyotan = new Puyotan.Puyotan();
     let vm = this.puyotan.getViewModel();
     this.state = {
-      activePair1: vm.players[0].activePair,
-      activePair2: vm.players[1].activePair,
-      field1: vm.players[0].field,
-      field2: vm.players[1].field,
-      next11: vm.players[0].next1,
-      next12: vm.players[0].next2,
-      next21: vm.players[1].next1,
-      next22: vm.players[1].next2,
-      frame: vm.frame,
-      actionHistories1: vm.players[0].actionHistories,
-      actionHistories2: vm.players[1].actionHistories,
       controledPos1: 0,
       controledDir1: 0,
       controledPos2: 0,
       controledDir2: 0,
       isControlledPlayer1: true,
       isControlledPlayer2: true,
-      chain1: vm.players[0].chain,
-      chain2: vm.players[1].chain,
-      score1: vm.players[0].score,
-      score2: vm.players[1].score,
-      usedScore1: vm.players[0].usedScore,
-      usedScore2: vm.players[1].usedScore,
-      nonActiveOjama1: vm.players[0].nonActiveOjama,
-      nonActiveOjama2: vm.players[1].nonActiveOjama,
-      activeOjama1: vm.players[0].activeOjama,
-      activeOjama2: vm.players[1].activeOjama,
-      gameStatusText: vm.gameStatusText,
     };
+    Object.assign(this.state, this.puyotanViewModelToStateObject(vm));
+    this.isControllable = true;
 
     // keyboard 操作用
     window.addEventListener('keydown', e => {
       e.preventDefault();
+      if (!this.isControllable) return;
       switch (e.keyCode) {
         case 37: // ←キー
           this.moveLeft();
@@ -127,13 +108,13 @@ export default class Game extends React.Component {
         </div>
         <div className={"Game-field Game-pos-field1" + (this.state.isControlledPlayer1 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field1)}
-          <div style={({ top: 32 * (13 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)}`}></div>
-          <div style={({ top: 32 * (13 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)}`}></div>
+          <div style={({ top: 32 * (13 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (13 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null ? "hidden" : ""}`}></div>
         </div>
         <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field2)}
-          <div style={({ top: 32 * (13 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)}`}></div>
-          <div style={({ top: 32 * (13 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)}`}></div>
+          <div style={({ top: 32 * (13 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (13 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null ? "hidden" : ""}`}></div>
         </div>
         <div className="Game-next Game-pos-next11">
           {this.nextToElements(this.state.next11)}
@@ -209,6 +190,9 @@ export default class Game extends React.Component {
           case Puyotan.ActionType.CHAIN:
             text = `CHAIN`;
             break;
+          case Puyotan.ActionType.CHAIN_FALL:
+            text = `CHAIN_FALL`;
+            break;
           case Puyotan.ActionType.OJAMA:
             text = `OJAMA`;
             break;
@@ -263,37 +247,14 @@ export default class Game extends React.Component {
     this.setState({ isControlledPlayer2: !this.state.isControlledPlayer2 })
   }
 
-  reflectPuyotanView() {
-    let vm = this.puyotan.getViewModel();
-    this.setState({
-      activePair1: vm.players[0].activePair,
-      activePair2: vm.players[1].activePair,
-      field1: vm.players[0].field,
-      field2: vm.players[1].field,
-      next11: vm.players[0].next1,
-      next12: vm.players[0].next2,
-      next21: vm.players[1].next1,
-      next22: vm.players[1].next2,
-      frame: vm.frame,
-      actionHistories1: vm.players[0].actionHistories,
-      actionHistories2: vm.players[1].actionHistories,
-      chain1: vm.players[0].chain,
-      chain2: vm.players[1].chain,
-      score1: vm.players[0].score,
-      score2: vm.players[1].score,
-      usedScore1: vm.players[0].usedScore,
-      usedScore2: vm.players[1].usedScore,
-      nonActiveOjama1: vm.players[0].nonActiveOjama,
-      nonActiveOjama2: vm.players[1].nonActiveOjama,
-      activeOjama1: vm.players[0].activeOjama,
-      activeOjama2: vm.players[1].activeOjama,
-      gameStatusText: vm.gameStatusText,
-    })
+  reflectPuyotanView(vm) {
+    this.setState(this.puyotanViewModelToStateObject(vm));
   }
 
   gameStart() {
     this.puyotan.start();
-    this.reflectPuyotanView();
+    let vm = this.puyotan.getViewModel();
+    this.reflectPuyotanView(vm);
     this.setState({
       controledPos1: 3,
       controledDir1: 0,
@@ -347,14 +308,38 @@ export default class Game extends React.Component {
   }
 
   putPuyo() {
-    if (this.state.isControlledPlayer1) this.puyotan.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1))
-    if (this.state.isControlledPlayer2) this.puyotan.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2))
+    if (this.state.isControlledPlayer1) {
+      this.puyotan.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1))
+      this.setState({
+        controledPos1: 3,
+        controledDir1: 0,
+      })
+    }
+    if (this.state.isControlledPlayer2) {
+      this.puyotan.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2))
+      this.setState({
+        controledPos2: 3,
+        controledDir2: 0,
+      })
+    }
     this.stepNextFrame();
   }
 
   pass() {
-    if (this.state.isControlledPlayer1) this.puyotan.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS));
-    if (this.state.isControlledPlayer2) this.puyotan.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS));
+    if (this.state.isControlledPlayer1) {
+      this.puyotan.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS));
+      this.setState({
+        controledPos1: 3,
+        controledDir1: 0,
+      })
+    }
+    if (this.state.isControlledPlayer2) {
+      this.puyotan.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS));
+      this.setState({
+        controledPos2: 3,
+        controledDir2: 0,
+      })
+    }
     this.stepNextFrame();
   }
 
@@ -388,6 +373,40 @@ export default class Game extends React.Component {
 
   stepNextFrame() {
     this.puyotan.stepNextFrame();
-    this.reflectPuyotanView();
+    let vm = this.puyotan.getViewModel();
+    this.reflectPuyotanView(vm);
+    if (vm.players[0].actionHistories[vm.frame] != null && vm.players[1].actionHistories[vm.frame] != null) {
+      this.isControllable = false;
+      setTimeout(() => {this.stepNextFrame()}, 500);
+    } else {
+      this.isControllable = true;
+    }
+  }
+
+  puyotanViewModelToStateObject(vm) {
+    return {
+      activePair1: vm.players[0].activePair,
+      activePair2: vm.players[1].activePair,
+      field1: vm.players[0].field,
+      field2: vm.players[1].field,
+      next11: vm.players[0].next1,
+      next12: vm.players[0].next2,
+      next21: vm.players[1].next1,
+      next22: vm.players[1].next2,
+      frame: vm.frame,
+      actionHistories1: vm.players[0].actionHistories,
+      actionHistories2: vm.players[1].actionHistories,
+      chain1: vm.players[0].chain,
+      chain2: vm.players[1].chain,
+      score1: vm.players[0].score,
+      score2: vm.players[1].score,
+      usedScore1: vm.players[0].usedScore,
+      usedScore2: vm.players[1].usedScore,
+      nonActiveOjama1: vm.players[0].nonActiveOjama,
+      nonActiveOjama2: vm.players[1].nonActiveOjama,
+      activeOjama1: vm.players[0].activeOjama,
+      activeOjama2: vm.players[1].activeOjama,
+      gameStatusText: vm.gameStatusText,
+    }
   }
 }

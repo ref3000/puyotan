@@ -6,7 +6,8 @@ const ActionType = {
   PASS: 0,
   PUT: 1,
   CHAIN: 2,
-  OJAMA: 3
+  CHAIN_FALL: 3,
+  OJAMA: 4,
 }
 
 class Action {
@@ -157,7 +158,7 @@ class Puyotan {
             }
             if (p.field.canFire()) {
               p.chain = 0;
-              p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.CHAIN), 2);
+              p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.CHAIN), 1);
             }
             break;
           case ActionType.CHAIN:
@@ -179,9 +180,17 @@ class Puyotan {
             if (ojama > 0) {
               this.sendOjama(id, ojama);
             }
+            if (p.field.canFall()) {
+              p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.CHAIN_FALL), 0);
+            } else {
+              this.activeOjama(id);
+            }
+            break;
+          case ActionType.CHAIN_FALL:
+            if (!p.field.canFall()) throw new Error('failed to fall puyo.');
             p.field.fall();
             if (p.field.canFire()) {
-              p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.CHAIN), 2);
+              p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.CHAIN), 1);
             } else {
               this.activeOjama(id);
             }
@@ -215,9 +224,9 @@ class Puyotan {
       this.gameStatusText = `Player ${alivePlayerId + 1} の勝利！`;
     }
     // 5. おじゃま処理
-    // 次フレームが操作可能でアクティブなおじゃまがあったらおじゃまを行動予約（硬直１）
+    // 今フレームがおじゃまでなく次フレームが操作可能でアクティブなおじゃまがあったらおじゃまを行動予約（硬直１）
     this.players.forEach((p, id) => {
-      if (p.actionHistories[this.frame + 1] == null && p.activeOjama > 0) {
+      if (p.actionHistories[this.frame].action.type !== ActionType.OJAMA && p.actionHistories[this.frame + 1] == null && p.activeOjama > 0) {
         p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.OJAMA), 0);
       }
     });
