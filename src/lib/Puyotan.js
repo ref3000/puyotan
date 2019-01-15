@@ -87,20 +87,21 @@ class Puyotan {
   }
 
   setAction(id, action) {
-    if (this.frame <= 0) return;
+    if (this.frame <= 0) return false;
     let history = this.players[id].actionHistories[this.frame];
     if (history == null) {
       switch (action.type) {
         case ActionType.PASS:
           this.players[id].actionHistories[this.frame] = new ActionHistory(action, 0);
-          break;
+          return true;
         case ActionType.PUT:
           this.players[id].actionHistories[this.frame] = new ActionHistory(action, 1);
-          break;
+          return true;
         default:
           throw new Error('unsupported action type.');
       }
     }
+    return false;
   }
 
   canStepNextFrame() {

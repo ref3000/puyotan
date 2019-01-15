@@ -104,15 +104,15 @@ export default class Game extends React.Component {
     // ref.orderBy('')
     db.collection("puyotan/histories/0").onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
-        if (this.state.frame === doc.id) {
-          this.setAction(0, doc.data());
+        if (String(this.state.frame) === doc.id) {
+          this.setAction(0, doc.data(), this.state.frame, false);
         }
       });
     });
     db.collection("puyotan/histories/1").onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
-        if (this.state.frame === doc.id) {
-          this.setAction(1, doc.data());
+        if (String(this.state.frame) === doc.id) {
+          this.setAction(1, doc.data(), this.state.frame, false);
         }
       });
     });
@@ -284,17 +284,33 @@ export default class Game extends React.Component {
     })
   }
 
-  setAction(id, action) {
-    this.puyotan.setAction(id, action);
-    db.collection(`puyotan/histories/${id}`).doc(String(this.state.frame)).set({
-      type: action.type,
-      x: action.x,
-      dir: action.dir,
-    }).then(function () {
-      console.log("Document successfully written!");
-    }).catch(function (error) {
-      throw Error(error);
-    });
+  setAction(id, action, frame, isMyself) {
+    console.log('setAction', id, action, frame, isMyself)
+    if (this.puyotan.getViewModel().frame === frame && this.puyotan.setAction(id, action)) {
+      if (id === 0) {
+        this.setState({
+          controledPos1: 3,
+          controledDir1: 0,
+        });
+      } else {
+        this.setState({
+          controledPos2: 3,
+          controledDir2: 0,
+        });
+      }
+      if (isMyself) {
+        db.collection(`puyotan/histories/${id}`).doc(String(this.state.frame)).set({
+          type: action.type,
+          x: action.x,
+          dir: action.dir,
+        }).then(function () {
+          console.log("Document successfully written!");
+        }).catch(function (error) {
+          throw Error(error);
+        });
+      }
+      this.stepNextFrame();
+    }
   }
 
   moveLeft() {
@@ -339,38 +355,20 @@ export default class Game extends React.Component {
 
   putPuyo() {
     if (this.state.isControlledPlayer1) {
-      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1))
-      this.setState({
-        controledPos1: 3,
-        controledDir1: 0,
-      })
+      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos1, this.state.controledDir1), this.state.frame, true)
     }
     if (this.state.isControlledPlayer2) {
-      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2))
-      this.setState({
-        controledPos2: 3,
-        controledDir2: 0,
-      })
+      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PUT, this.state.controledPos2, this.state.controledDir2), this.state.frame, true)
     }
-    this.stepNextFrame();
   }
 
   pass() {
     if (this.state.isControlledPlayer1) {
-      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS));
-      this.setState({
-        controledPos1: 3,
-        controledDir1: 0,
-      })
+      this.setAction(0, new Puyotan.Action(Puyotan.ActionType.PASS), this.state.frame, true);
     }
     if (this.state.isControlledPlayer2) {
-      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS));
-      this.setState({
-        controledPos2: 3,
-        controledDir2: 0,
-      })
+      this.setAction(1, new Puyotan.Action(Puyotan.ActionType.PASS), this.state.frame, true);
     }
-    this.stepNextFrame();
   }
 
   getAxisPos1() {
