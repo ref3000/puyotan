@@ -182,6 +182,9 @@ class Puyotan {
             if (ojama > 0) {
               this.sendOjama(id, ojama);
             }
+            if (p.field.isAllClear()) {
+              p.score += 2100;
+            }
             if (p.field.canFall()) {
               p.actionHistories[this.frame + 1] = new ActionHistory(new Action(ActionType.CHAIN_FALL), 0);
             } else {
