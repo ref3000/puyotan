@@ -77,22 +77,22 @@
 
 .Game-pos-leftmove {
   left: 410px;
-  top: 330px;
+  top: 385px;
 }
 
 .Game-pos-rightmove {
   right: 410px;
-  top: 330px;
+  top: 385px;
 }
 
 .Game-pos-leftturn {
   left: 410px;
-  top: 385px;
+  top: 330px;
 }
 
 .Game-pos-rightturn {
   right: 410px;
-  top: 385px;
+  top: 330px;
 }
 
 .Game-pos-put {
