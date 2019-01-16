@@ -135,7 +135,7 @@ export default class Game extends React.Component {
       this.dbActions1 = [];
       this.initPuyotan(info.seed);
       if (cancel0 != null) cancel0();
-      cancel0 = db.collection(`puyotan/actions/${info.seed}/ids/0`).onSnapshot({includeMetadataChanges: true}, (querySnapshot) => {
+      cancel0 = db.collection(`puyotan/actions/${info.seed}/ids/0`).onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
         let actions = [];
         querySnapshot.forEach((doc) => {
           let d = doc.data();
@@ -151,7 +151,7 @@ export default class Game extends React.Component {
         this.applyActions();
       });
       if (cancel1 != null) cancel1();
-      cancel1 = db.collection(`puyotan/actions/${info.seed}/ids/1`).onSnapshot({includeMetadataChanges: true}, (querySnapshot) => {
+      cancel1 = db.collection(`puyotan/actions/${info.seed}/ids/1`).onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
         let actions = [];
         querySnapshot.forEach((doc) => {
           let d = doc.data();
@@ -172,34 +172,6 @@ export default class Game extends React.Component {
   render() {
     return (
       <div className="Game" >
-        <div className={`Game-history Game-pos-history1`}>
-          {this.actionHistoriesToElements(this.state.actionHistories1)}
-        </div>
-        <div className={`Game-history Game-pos-history2`}>
-          {this.actionHistoriesToElements(this.state.actionHistories2)}
-        </div>
-        <div className={"Game-field Game-pos-field1" + (this.state.isControlledPlayer1 ? " Game-field-active" : "")}>
-          {this.fieldToElements(this.state.field1)}
-          <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
-        </div>
-        <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
-          {this.fieldToElements(this.state.field2)}
-          <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
-        </div>
-        <div className="Game-next Game-pos-next11">
-          {this.nextToElements(this.state.next11)}
-        </div>
-        <div className="Game-next Game-pos-next12">
-          {this.nextToElements(this.state.next12)}
-        </div>
-        <div className="Game-next Game-pos-next21">
-          {this.nextToElements(this.state.next21)}
-        </div>
-        <div className="Game-next Game-pos-next22">
-          {this.nextToElements(this.state.next22)}
-        </div>
         <div className="Game-pos-chain1">
           {this.state.chain1} CHAIN
         </div>
@@ -235,6 +207,34 @@ export default class Game extends React.Component {
         </div>
         <div className="Game-pos-gameStatusText">
           statusText: {this.state.gameStatusText}
+        </div>
+        <div className={`Game-history Game-pos-history1`}>
+          {this.actionHistoriesToElements(this.state.actionHistories1)}
+        </div>
+        <div className={`Game-history Game-pos-history2`}>
+          {this.actionHistoriesToElements(this.state.actionHistories2)}
+        </div>
+        <div className={"Game-field Game-pos-field1" + (this.state.isControlledPlayer1 ? " Game-field-active" : "")}>
+          {this.fieldToElements(this.state.field1)}
+          <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
+        </div>
+        <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
+          {this.fieldToElements(this.state.field2)}
+          <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
+        </div>
+        <div className="Game-next Game-pos-next11">
+          {this.nextToElements(this.state.next11)}
+        </div>
+        <div className="Game-next Game-pos-next12">
+          {this.nextToElements(this.state.next12)}
+        </div>
+        <div className="Game-next Game-pos-next21">
+          {this.nextToElements(this.state.next21)}
+        </div>
+        <div className="Game-next Game-pos-next22">
+          {this.nextToElements(this.state.next22)}
         </div>
         {/* <div>
           <input type="button" value="GameStart" onClick={e => this.gameStart()} />
