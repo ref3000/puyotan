@@ -53,6 +53,8 @@ export default class Game extends React.Component {
       controledDir2: 0,
       isControlledPlayer1: true,
       isControlledPlayer2: true,
+
+      seed: 0,
     };
     // Object.assign(this.state, this.puyotanViewModelToStateObject(vm));
     this.isControllable = true;
@@ -122,50 +124,49 @@ export default class Game extends React.Component {
     })
 
     // firestore 監視用
+    this.dbActions0 = [];
+    this.dbActions1 = [];
+    let cancel0;
+    let cancel1;
     db.collection("puyotan").doc("info").onSnapshot((docSnapshot) => {
       let info = docSnapshot.data();
+      if (info == null) return;
+      this.dbActions0 = [];
+      this.dbActions1 = [];
       this.initPuyotan(info.seed);
-    });
-    db.collection("puyotan/actions/0").onSnapshot((querySnapshot) => {
-      let actions = [];
-      querySnapshot.forEach((doc) => {
-        let d = doc.data();
-        actions[doc.id] = {
-          type: d.type,
-          x: d.x,
-          dir: d.dir,
-        }
+      if (cancel0 != null) cancel0();
+      cancel0 = db.collection(`puyotan/actions/${info.seed}/ids/0`).onSnapshot({includeMetadataChanges: true}, (querySnapshot) => {
+        let actions = [];
+        querySnapshot.forEach((doc) => {
+          let d = doc.data();
+          if (!doc.metadata.hasPendingWrites) {
+            actions[doc.id] = {
+              type: d.type,
+              x: d.x,
+              dir: d.dir,
+            }
+          }
+        });
+        this.dbActions0 = actions;
+        this.applyActions();
       });
-      this.applyActions(0, actions);
-    });
-    db.collection("puyotan/actions/1").onSnapshot((querySnapshot) => {
-      let actions = [];
-      querySnapshot.forEach((doc) => {
-        let d = doc.data();
-        actions[doc.id] = {
-          type: d.type,
-          x: d.x,
-          dir: d.dir,
-        }
+      if (cancel1 != null) cancel1();
+      cancel1 = db.collection(`puyotan/actions/${info.seed}/ids/1`).onSnapshot({includeMetadataChanges: true}, (querySnapshot) => {
+        let actions = [];
+        querySnapshot.forEach((doc) => {
+          let d = doc.data();
+          if (!doc.metadata.hasPendingWrites) {
+            actions[doc.id] = {
+              type: d.type,
+              x: d.x,
+              dir: d.dir,
+            }
+          }
+        });
+        this.dbActions1 = actions;
+        this.applyActions();
       });
-      this.applyActions(1, actions);
     });
-
-    // db.collection("puyotan/histories/0").onSnapshot((querySnapshot) => {
-    //   let histories = [];
-    //   querySnapshot.forEach((doc) => {
-    //     histories.push(doc.data());
-    //   });
-    //   console.log('update!');
-    //   console.log(histories);
-    // });
-    // db.collection("puyotan/histories/1").onSnapshot((querySnapshot) => {
-    //   querySnapshot.forEach((doc) => {
-    //     if (String(this.state.frame) === doc.id) {
-    //       this.setAction(1, doc.data(), this.state.frame, false);
-    //     }
-    //   });
-    // });
   }
 
   render() {
@@ -409,6 +410,7 @@ export default class Game extends React.Component {
   }
 
   stepNextFrame() {
+    if (!this.puyotan.canStepNextFrame()) return;
     this.puyotan.stepNextFrame();
     let vm = this.puyotan.getViewModel();
     this.reflectPuyotanView(vm);
@@ -417,6 +419,7 @@ export default class Game extends React.Component {
       setTimeout(() => { this.stepNextFrame() }, 500);
     } else {
       this.isControllable = true;
+      this.applyActions(500);
     }
   }
 
@@ -448,39 +451,54 @@ export default class Game extends React.Component {
   }
 
   sendAction(id, frame, action) {
-    db.collection(`puyotan/actions/${id}`).doc(String(frame)).set({
+    db.collection(`puyotan/actions/${this.state.seed}/ids/${id}`).doc(String(frame)).set({
       type: action.type,
       x: action.x,
       dir: action.dir,
     }).then(function () {
       console.log("Document successfully written!");
     }).catch(function (error) {
-      throw Error(error);
+      console.error(error);
     });
   }
 
   setAction(id, frame, action) {
-    console.log(id, frame, action);
-    if (this.puyotan.frame === frame && this.puyotan.setAction(id, action)) {
-      // if (id === 0) {
-      //   this.setState({
-      //     controledPos1: 3,
-      //     controledDir1: 0,
-      //   });
-      // } else {
-      //   this.setState({
-      //     controledPos2: 3,
-      //     controledDir2: 0,
-      //   });
-      // }
+    console.log('setAction(id, frame, action)', id, frame, action);
+    if (this.puyotan.frame !== frame) return;
+    if (this.puyotan.setAction(id, action)) {
+      if (id === 0) {
+        this.setState({
+          controledPos1: 3,
+          controledDir1: 0,
+        });
+      } else {
+        this.setState({
+          controledPos2: 3,
+          controledDir2: 0,
+        });
+      }
       this.stepNextFrame();
     }
   }
 
-  applyActions(id, actions) {
-    console.log('applyActions', id, actions)
-    let action = actions[this.state.frame];
-    if (action != null) this.setAction(id, this.state.frame, action);
+  applyActions(waitMs = 0) {
+    let frame = this.state.frame;
+    let action0 = this.dbActions0[frame];
+    let action1 = this.dbActions1[frame];
+    console.log(`applyActions(frame, action0, action1)`, frame, action0, action1)
+    if (action0 != null || action1 != null) {
+      if (waitMs <= 0) {
+        if (action0 != null) this.setAction(0, frame, action0);
+        if (action1 != null) this.setAction(1, frame, action1);
+      } else {
+        this.isControllable = false;
+        setTimeout(() => {
+          if (action0 != null) this.setAction(0, frame, action0);
+          if (action1 != null) this.setAction(1, frame, action1);
+          this.isControllable = true;
+        }, waitMs);
+      }
+    }
   }
 
   sendInit() {
@@ -489,7 +507,7 @@ export default class Game extends React.Component {
     }).then(function () {
       console.log("Document successfully written!");
     }).catch(function (error) {
-      throw Error(error);
+      console.error(error);
     });
   }
 
@@ -500,6 +518,7 @@ export default class Game extends React.Component {
     let vm = this.puyotan.getViewModel();
     this.reflectPuyotanView(vm);
     this.setState({
+      seed: seed,
       controledPos1: 3,
       controledDir1: 0,
       controledPos2: 3,

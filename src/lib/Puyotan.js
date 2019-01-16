@@ -69,8 +69,8 @@ class Puyotan {
     this.random = new Random(seed);
     this.next = new Puyo.Next(this.random);
     this.players = [
-      new Player(),
-      new Player()
+      new Player(this.random),
+      new Player(this.random)
     ];
     this.frame = 0;
     this.gameStatusText = "待機中";
