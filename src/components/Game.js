@@ -55,24 +55,29 @@ export default class Game extends React.Component {
       isControlledPlayer2: true,
 
       seed: 0,
+      displayedSeed: 0,
     };
     // Object.assign(this.state, this.puyotanViewModelToStateObject(vm));
     this.isControllable = true;
 
     // keyboard 操作用
     window.addEventListener('keydown', e => {
-      e.preventDefault();
+      // e.preventDefault();
       if (!this.isControllable) return;
       switch (e.keyCode) {
         case 37: // ←キー
+          e.preventDefault();
           this.moveLeft();
           return
         case 39: // →キー
+          e.preventDefault();
           this.moveRight();
           return
         case 38: // ↑キー
+          e.preventDefault();
           return
         case 40: // ↓キー
+          e.preventDefault();
           this.putPuyo();
           return
         case 49: // 1
@@ -236,12 +241,16 @@ export default class Game extends React.Component {
         <div className="Game-next Game-pos-next22">
           {this.nextToElements(this.state.next22)}
         </div>
-        {/* <div>
-          <input type="button" value="GameStart" onClick={e => this.gameStart()} />
-          <input type="button" value="StepNextFrame" onClick={e => this.stepNextFrame()} />
-        </div>
-        <input type="button" value="[1P] ON/OFF" onClick={e => this.toggleControlledPlayer1()} />
-        <input type="button" value="[2P] ON/OFF" onClick={e => this.toggleControlledPlayer2()} /> */}
+        <input type="button" value="[1P] ON/OFF" onClick={e => this.toggleControlledPlayer1()} className={`Game-button Game-size-onoff Game-pos-onoff1`} />
+        <input type="button" value="[2P] ON/OFF" onClick={e => this.toggleControlledPlayer2()} className={`Game-button Game-size-onoff Game-pos-onoff2`} />
+        <input type="button" value="⇦" onClick={e => this.moveLeft()} className={`Game-button Game-size-button Game-pos-leftmove`} />
+        <input type="button" value="⇨" onClick={e => this.moveRight()} className={`Game-button Game-size-button Game-pos-rightmove`} />
+        <input type="button" value="L" onClick={e => this.turnLeft()} className={`Game-button Game-size-button Game-pos-leftturn`} />
+        <input type="button" value="R" onClick={e => this.turnRight()} className={`Game-button Game-size-button Game-pos-rightturn`} />
+        <input type="button" value="⇩" onClick={e => this.putPuyo()} className={`Game-button Game-size-button2 Game-pos-put`} />
+        <input type="button" value="Reset" onClick={e => this.sendInit()} className={`Game-button Game-size-reset Game-pos-reset`} />
+        <input type="number" value={this.state.displayedSeed} onChange={e => this.setState({ displayedSeed: e.target.value })} className={`Game-input-seed`} />
+        <input type="button" value="GO" onClick={e => this.sendInit(this.state.displayedSeed)} className={`Game-button Game-size-go Game-pos-go`} />
       </div>
     );
   }
@@ -501,9 +510,10 @@ export default class Game extends React.Component {
     }
   }
 
-  sendInit() {
+  sendInit(seed) {
+    if (seed == null) seed = Math.floor(Math.random() * Math.floor(9999));
     db.collection(`puyotan`).doc('info').set({
-      seed: Math.floor(Math.random() * Math.floor(9999))
+      seed: seed
     }).then(function () {
       console.log("Document successfully written!");
     }).catch(function (error) {
@@ -519,6 +529,7 @@ export default class Game extends React.Component {
     this.reflectPuyotanView(vm);
     this.setState({
       seed: seed,
+      displayedSeed: seed,
       controledPos1: 3,
       controledDir1: 0,
       controledPos2: 3,
