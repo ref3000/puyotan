@@ -51,8 +51,8 @@ export default class Game extends React.Component {
       controledDir1: 0,
       controledPos2: 0,
       controledDir2: 0,
-      isControlledPlayer1: true,
-      isControlledPlayer2: true,
+      isControlledPlayer1: false,
+      isControlledPlayer2: false,
 
       seed: 0,
       displayedSeed: 0,
@@ -241,8 +241,8 @@ export default class Game extends React.Component {
         <div className="Game-next Game-pos-next22">
           {this.nextToElements(this.state.next22)}
         </div>
-        <input type="button" value="[1P] ON/OFF" onClick={e => this.toggleControlledPlayer1()} className={`Game-button Game-size-onoff Game-pos-onoff1`} />
-        <input type="button" value="[2P] ON/OFF" onClick={e => this.toggleControlledPlayer2()} className={`Game-button Game-size-onoff Game-pos-onoff2`} />
+        <input type="button" value={this.state.isControlledPlayer1 ? `[1P] 離席` : `[1P] 着席`} onClick={e => this.toggleControlledPlayer1()} className={`Game-button Game-size-onoff Game-pos-onoff1`} />
+        <input type="button" value={this.state.isControlledPlayer2 ? `[2P] 離席` : `[2P] 着席`} onClick={e => this.toggleControlledPlayer2()} className={`Game-button Game-size-onoff Game-pos-onoff2`} />
         <input type="button" value="⇦" onClick={e => this.moveLeft()} className={`Game-button Game-size-button Game-pos-leftmove`} />
         <input type="button" value="⇨" onClick={e => this.moveRight()} className={`Game-button Game-size-button Game-pos-rightmove`} />
         <input type="button" value="L" onClick={e => this.turnLeft()} className={`Game-button Game-size-button Game-pos-leftturn`} />
