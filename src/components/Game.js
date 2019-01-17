@@ -117,9 +117,10 @@ export default class Game extends React.Component {
           this.pass();
           return
         case 82: // r
+          this.sendInit(this.state.seed + 1);
           return
         case 83: // s
-          this.sendInit();
+          // this.sendInit();
           return
         case 84: // t
           return
@@ -248,7 +249,7 @@ export default class Game extends React.Component {
         <input type="button" value="L" onClick={e => this.turnLeft()} className={`Game-button Game-size-button Game-pos-leftturn`} />
         <input type="button" value="R" onClick={e => this.turnRight()} className={`Game-button Game-size-button Game-pos-rightturn`} />
         <input type="button" value="⇩" onClick={e => this.putPuyo()} className={`Game-button Game-size-button2 Game-pos-put`} />
-        <input type="button" value="Reset" onClick={e => this.sendInit()} className={`Game-button Game-size-reset Game-pos-reset`} />
+        <input type="button" value="Reset" onClick={e => this.sendInit(this.state.seed + 1)} className={`Game-button Game-size-reset Game-pos-reset`} />
         <input type="number" value={this.state.displayedSeed} onChange={e => this.setState({ displayedSeed: e.target.value })} className={`Game-input-seed`} />
         <input type="button" value="GO" onClick={e => this.sendInit(this.state.displayedSeed)} className={`Game-button Game-size-go Game-pos-go`} />
       </div>
