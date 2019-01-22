@@ -178,8 +178,12 @@ export default class Game extends React.Component {
   render() {
     let prevHistory1 = this.state.actionHistories1[this.state.frame - 1];
     let prevAction1 = (prevHistory1 == null ? new Puyotan.Action() : prevHistory1.action)
+    if (prevHistory1 != null && prevHistory1.remainingFrame !== 1 && prevAction1.type === Puyotan.ActionType.PUT) prevAction1 = new Puyotan.Action(Puyotan.ActionType.PUT, 3, 0);
     let prevHistory2 = this.state.actionHistories2[this.state.frame - 1];
     let prevAction2 = (prevHistory2 == null ? new Puyotan.Action() : prevHistory2.action)
+    if (prevHistory2 != null && prevHistory2.remainingFrame !== 1 && prevAction2.type === Puyotan.ActionType.PUT) prevAction2 = new Puyotan.Action(Puyotan.ActionType.PUT, 3, 0);
+    let visibleControlledPuyo1 = this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1;
+    let visibleControlledPuyo2 = this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2;
     return (
       <div className="Game" >
         <div className="Game-pos-chain1">
@@ -226,17 +230,17 @@ export default class Game extends React.Component {
         </div>
         <div className={"Game-field Game-pos-field1" + (this.state.isControlledPlayer1 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field1)}
-          <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction1.dir)), left: 32 * (prevAction1.x - 1 + this.getSubDiffX(prevAction1.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${prevAction1.type === Puyotan.ActionType.PUT && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
-          <div style={({ top: 32 * -1, left: 32 * (prevAction1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${prevAction1.type === Puyotan.ActionType.PUT && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${visibleControlledPuyo1 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${visibleControlledPuyo1 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction1.dir)), left: 32 * (prevAction1.x - 1 + this.getSubDiffX(prevAction1.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${(prevAction1.type === Puyotan.ActionType.PUT) && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * -1, left: 32 * (prevAction1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${(prevAction1.type === Puyotan.ActionType.PUT) && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
         </div>
         <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field2)}
-          <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction2.dir)), left: 32 * (prevAction2.x - 1 + this.getSubDiffX(prevAction2.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${prevAction2.type === Puyotan.ActionType.PUT && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
-          <div style={({ top: 32 * -1, left: 32 * (prevAction2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${prevAction2.type === Puyotan.ActionType.PUT && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${visibleControlledPuyo2 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${visibleControlledPuyo2 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction2.dir)), left: 32 * (prevAction2.x - 1 + this.getSubDiffX(prevAction2.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${(prevAction2.type === Puyotan.ActionType.PUT) && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * -1, left: 32 * (prevAction2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${(prevAction2.type === Puyotan.ActionType.PUT) && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
         </div>
         <div className="Game-next Game-pos-next11">
           {this.nextToElements(this.state.next11)}
