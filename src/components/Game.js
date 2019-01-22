@@ -176,6 +176,10 @@ export default class Game extends React.Component {
   }
 
   render() {
+    let prevHistory1 = this.state.actionHistories1[this.state.frame - 1];
+    let prevAction1 = (prevHistory1 == null ? new Puyotan.Action() : prevHistory1.action)
+    let prevHistory2 = this.state.actionHistories2[this.state.frame - 1];
+    let prevAction2 = (prevHistory2 == null ? new Puyotan.Action() : prevHistory2.action)
     return (
       <div className="Game" >
         <div className="Game-pos-chain1">
@@ -224,11 +228,15 @@ export default class Game extends React.Component {
           {this.fieldToElements(this.state.field1)}
           <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
           <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction1.dir)), left: 32 * (prevAction1.x - 1 + this.getSubDiffX(prevAction1.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${prevAction1.type === Puyotan.ActionType.PUT && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * -1, left: 32 * (prevAction1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${prevAction1.type === Puyotan.ActionType.PUT && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
         </div>
         <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field2)}
           <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
           <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2 ? "hidden" : ""}`}></div>
+          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction2.dir)), left: 32 * (prevAction2.x - 1 + this.getSubDiffX(prevAction2.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${prevAction2.type === Puyotan.ActionType.PUT && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * -1, left: 32 * (prevAction2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${prevAction2.type === Puyotan.ActionType.PUT && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
         </div>
         <div className="Game-next Game-pos-next11">
           {this.nextToElements(this.state.next11)}
@@ -254,6 +262,26 @@ export default class Game extends React.Component {
         <input type="button" value="GO" onClick={e => this.sendInit(this.state.displayedSeed)} className={`Game-button Game-size-go Game-pos-go`} />
       </div>
     );
+  }
+
+  getSubDiffX(dir) {
+    switch (dir) {
+      case 0: return 0;
+      case 1: return 1;
+      case 2: return 0;
+      case 3: return -1;
+      default: throw Error(`unsupported dir ${dir}`);
+    }
+  }
+
+  getSubDiffY(dir) {
+    switch (dir) {
+      case 0: return -1;
+      case 1: return 0;
+      case 2: return 1;
+      case 3: return 0;
+      default: throw Error(`unsupported dir ${dir}`);
+    }
   }
 
   actionHistoriesToElements(actionHistories) {
