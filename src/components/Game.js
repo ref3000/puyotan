@@ -182,8 +182,67 @@ export default class Game extends React.Component {
     let prevHistory2 = this.state.actionHistories2[this.state.frame - 1];
     let prevAction2 = (prevHistory2 == null ? new Puyotan.Action() : prevHistory2.action)
     if (prevHistory2 != null && prevHistory2.remainingFrame !== 1 && prevAction2.type === Puyotan.ActionType.PUT) prevAction2 = new Puyotan.Action(Puyotan.ActionType.PUT, 3, 0);
-    let visibleControlledPuyo1 = this.state.actionHistories1[this.state.frame] != null || !this.state.isControlledPlayer1;
-    let visibleControlledPuyo2 = this.state.actionHistories2[this.state.frame] != null || !this.state.isControlledPlayer2;
+
+    let currentHistory1 = this.state.actionHistories1[this.state.frame];
+    let currentHistory2 = this.state.actionHistories1[this.state.frame];
+
+    let floatingDir1 = this.state.controledDir1;
+    let floatingDir2 = this.state.controledDir2;
+    let floatingAxisPos1 = new Puyo.Pos(this.state.controledPos1, 12);
+    let floatingAxisPos2 = new Puyo.Pos(this.state.controledPos2, 12);
+
+    let visibleFloatingPuyo1 = this.state.isControlledPlayer1 && currentHistory1 == null;
+    let visibleFloatingPuyo2 = this.state.isControlledPlayer2 && currentHistory2 == null;
+
+    if (currentHistory1 != null && currentHistory1.action.type === Puyotan.ActionType.PUT && currentHistory1.remainingFrame === 0) {
+      floatingDir1 = currentHistory1.action.dir;
+      floatingAxisPos1 = new Puyo.Pos(currentHistory1.action.x, 12);
+      visibleFloatingPuyo1 = true;
+    } else if (currentHistory1 != null && currentHistory1.action.type === Puyotan.ActionType.PUT && currentHistory1.remainingFrame === 1) {
+      if (this.state.isControlledPlayer1) {
+        floatingDir1 = currentHistory1.action.dir;
+        floatingAxisPos1 = new Puyo.Pos(currentHistory1.action.x, 12);
+      } else {
+        floatingDir1 = 0;
+        floatingAxisPos1 = new Puyo.Pos(3, 12);
+      }
+      visibleFloatingPuyo1 = true;
+    } else if (currentHistory1 != null && currentHistory1.action.type === Puyotan.ActionType.PASS) {
+      floatingDir1 = 0;
+      floatingAxisPos1 = new Puyo.Pos(3, 12);
+      visibleFloatingPuyo1 = true;
+    } else if (currentHistory1 == null && !this.state.isControlledPlayer1) {
+      floatingDir1 = 0;
+      floatingAxisPos1 = new Puyo.Pos(3, 12);
+      visibleFloatingPuyo1 = true;
+    }
+
+    if (currentHistory2 != null && currentHistory2.action.type === Puyotan.ActionType.PUT && currentHistory2.remainingFrame === 0) {
+      floatingDir2 = currentHistory2.action.dir;
+      floatingAxisPos2 = new Puyo.Pos(currentHistory2.action.x, 12);
+      visibleFloatingPuyo2 = true;
+    } else if (currentHistory2 != null && currentHistory2.action.type === Puyotan.ActionType.PUT && currentHistory2.remainingFrame === 1) {
+      if (this.state.isControlledPlayer2) {
+        floatingDir2 = currentHistory2.action.dir;
+        floatingAxisPos2 = new Puyo.Pos(currentHistory2.action.x, 12);
+      } else {
+        floatingDir2 = 0;
+        floatingAxisPos2 = new Puyo.Pos(3, 12);
+      }
+      visibleFloatingPuyo2 = true;
+    } else if (currentHistory2 != null && currentHistory2.action.type === Puyotan.ActionType.PASS) {
+      floatingDir2 = 0;
+      floatingAxisPos2 = new Puyo.Pos(3, 12);
+      visibleFloatingPuyo2 = true;
+    } else if (currentHistory2 == null && !this.state.isControlledPlayer2) {
+      floatingDir2 = 0;
+      floatingAxisPos2 = new Puyo.Pos(3, 12);
+      visibleFloatingPuyo2 = true;
+    }
+
+    let floatingSubPos1 = this.getSubPos(floatingAxisPos1, floatingDir1);
+    let floatingSubPos2 = this.getSubPos(floatingAxisPos2, floatingDir2);
+
     return (
       <div className="Game" >
         <div className="Game-pos-chain1">
@@ -230,17 +289,17 @@ export default class Game extends React.Component {
         </div>
         <div className={"Game-field Game-pos-field1" + (this.state.isControlledPlayer1 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field1)}
-          <div style={({ top: 32 * (10 - this.getSubPos1().y), left: 32 * (this.getSubPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${visibleControlledPuyo1 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (10 - this.getAxisPos1().y), left: 32 * (this.getAxisPos1().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${visibleControlledPuyo1 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction1.dir)), left: 32 * (prevAction1.x - 1 + this.getSubDiffX(prevAction1.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${(prevAction1.type === Puyotan.ActionType.PUT) && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
-          <div style={({ top: 32 * -1, left: 32 * (prevAction1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${(prevAction1.type === Puyotan.ActionType.PUT) && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * (10 - floatingSubPos1.y), left: 32 * (floatingSubPos1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${visibleFloatingPuyo1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * (10 - floatingAxisPos1.y), left: 32 * (floatingAxisPos1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${visibleFloatingPuyo1 ? "" : "hidden"}`}></div>
+          {/* <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction1.dir)), left: 32 * (prevAction1.x - 1 + this.getSubDiffX(prevAction1.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.sub)} ${(prevAction1.type === Puyotan.ActionType.PUT) && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div> */}
+          {/* <div style={({ top: 32 * -1, left: 32 * (prevAction1.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair1.axis)} ${(prevAction1.type === Puyotan.ActionType.PUT) && prevHistory1.remainingFrame === 1 ? "" : "hidden"}`}></div> */}
         </div>
         <div className={"Game-field Game-pos-field2" + (this.state.isControlledPlayer2 ? " Game-field-active" : "")}>
           {this.fieldToElements(this.state.field2)}
-          <div style={({ top: 32 * (10 - this.getSubPos2().y), left: 32 * (this.getSubPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${visibleControlledPuyo2 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (10 - this.getAxisPos2().y), left: 32 * (this.getAxisPos2().x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${visibleControlledPuyo2 ? "hidden" : ""}`}></div>
-          <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction2.dir)), left: 32 * (prevAction2.x - 1 + this.getSubDiffX(prevAction2.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${(prevAction2.type === Puyotan.ActionType.PUT) && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
-          <div style={({ top: 32 * -1, left: 32 * (prevAction2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${(prevAction2.type === Puyotan.ActionType.PUT) && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * (10 - floatingSubPos2.y), left: 32 * (floatingSubPos2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${visibleFloatingPuyo2 ? "" : "hidden"}`}></div>
+          <div style={({ top: 32 * (10 - floatingAxisPos2.y), left: 32 * (floatingAxisPos2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${visibleFloatingPuyo2 ? "" : "hidden"}`}></div>
+          {/* <div style={({ top: 32 * (-1 + this.getSubDiffY(prevAction2.dir)), left: 32 * (prevAction2.x - 1 + this.getSubDiffX(prevAction2.dir)) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.sub)} ${(prevAction2.type === Puyotan.ActionType.PUT) && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div> */}
+          {/* <div style={({ top: 32 * -1, left: 32 * (prevAction2.x - 1) })} className={`Game-puyo ${this.kindToClassName(this.state.activePair2.axis)} ${(prevAction2.type === Puyotan.ActionType.PUT) && prevHistory2.remainingFrame === 1 ? "" : "hidden"}`}></div> */}
         </div>
         <div className="Game-next Game-pos-next11">
           {this.nextToElements(this.state.next11)}
@@ -268,23 +327,13 @@ export default class Game extends React.Component {
     );
   }
 
-  getSubDiffX(dir) {
+  getSubPos(axisPos, dir) {
     switch (dir) {
-      case 0: return 0;
-      case 1: return 1;
-      case 2: return 0;
-      case 3: return -1;
-      default: throw Error(`unsupported dir ${dir}`);
-    }
-  }
-
-  getSubDiffY(dir) {
-    switch (dir) {
-      case 0: return -1;
-      case 1: return 0;
-      case 2: return 1;
-      case 3: return 0;
-      default: throw Error(`unsupported dir ${dir}`);
+      case 0: return new Puyo.Pos(axisPos.x, axisPos.y + 1);
+      case 1: return new Puyo.Pos(axisPos.x + 1, axisPos.y);
+      case 2: return new Puyo.Pos(axisPos.x, axisPos.y - 1);
+      case 3: return new Puyo.Pos(axisPos.x - 1, axisPos.y);
+      default: throw Error(`unsupported dir ${this.state.controledDir1}`);
     }
   }
 
@@ -420,34 +469,6 @@ export default class Game extends React.Component {
     }
     if (this.state.isControlledPlayer2) {
       this.sendAction(1, this.state.frame, new Puyotan.Action(Puyotan.ActionType.PASS));
-    }
-  }
-
-  getAxisPos1() {
-    return new Puyo.Pos(this.state.controledPos1, 12);
-  }
-
-  getAxisPos2() {
-    return new Puyo.Pos(this.state.controledPos2, 12);
-  }
-
-  getSubPos1() {
-    switch (this.state.controledDir1) {
-      case 0: return new Puyo.Pos(this.state.controledPos1, 12 + 1);
-      case 1: return new Puyo.Pos(this.state.controledPos1 + 1, 12);
-      case 2: return new Puyo.Pos(this.state.controledPos1, 12 - 1);
-      case 3: return new Puyo.Pos(this.state.controledPos1 - 1, 12);
-      default: throw Error(`unsupported dir ${this.state.controledDir1}`);
-    }
-  }
-
-  getSubPos2() {
-    switch (this.state.controledDir2) {
-      case 0: return new Puyo.Pos(this.state.controledPos2, 12 + 1);
-      case 1: return new Puyo.Pos(this.state.controledPos2 + 1, 12);
-      case 2: return new Puyo.Pos(this.state.controledPos2, 12 - 1);
-      case 3: return new Puyo.Pos(this.state.controledPos2 - 1, 12);
-      default: throw Error(`unsupported dir ${this.state.controledDir2}`);
     }
   }
 
