@@ -184,7 +184,7 @@ export default class Game extends React.Component {
     if (prevHistory2 != null && prevHistory2.remainingFrame !== 1 && prevAction2.type === Puyotan.ActionType.PUT) prevAction2 = new Puyotan.Action(Puyotan.ActionType.PUT, 3, 0);
 
     let currentHistory1 = this.state.actionHistories1[this.state.frame];
-    let currentHistory2 = this.state.actionHistories1[this.state.frame];
+    let currentHistory2 = this.state.actionHistories2[this.state.frame];
 
     let floatingDir1 = this.state.controledDir1;
     let floatingDir2 = this.state.controledDir2;
