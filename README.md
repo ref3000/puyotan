@@ -1,3 +1,5 @@
+※ このリポジトリの内容はモックバージョンです。現在全部作り直して private リポジトリで開発中 そのうち公開するかも
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
